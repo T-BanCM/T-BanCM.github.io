@@ -105,13 +105,14 @@ function activarUsuario($id, $con){
 
 function login($usuario, $password, $con)
 {
-    $sql = $con->prepare("SELECT id, usuario, password FROM usuarios WHERE usuario LIKE ? LIMIT 1");
+    $sql = $con->prepare("SELECT id, usuario, password, role_id FROM usuarios WHERE usuario LIKE ? LIMIT 1");
     $sql->execute([$usuario]);
     if ($row = $sql->fetch(PDO::FETCH_ASSOC)) {
         if (esActivo($usuario, $con)) {
             if (password_verify($password, $row['password'])) {
                 $_SESSION['user_id'] = $row['id'];
                 $_SESSION['username'] = $row['usuario'];
+                $_SESSION['role'] = $row['role_id'];
                 header("Location: index.php");
                 exit;
             }
@@ -174,7 +175,7 @@ function verificasesion(){
     }
 }
 
-
+/*
 function hasrole($usuario,$con) {
     $sql = $con->prepare("SELECT role_id FROM usuarios WHERE usuario LIKE ? LIMIT 1");
     $sql->execute([$usuario]);
@@ -191,10 +192,22 @@ function hasrole($usuario,$con) {
         echo 'no tiene rol';
         return false;// El usuario no tiene el rol de ADMIN o no se encontró en la base de datos
     }
-}
+} */
+
+function hasrole() {
+    if ($_SESSION['role'] == 1) {
+        return true; // El usuario tiene el rol de ADMIN
+    } else if ($_SESSION['role'] == 2){
+        return false; 
+    } else {
+        echo 'no tiene rol';
+        return false;// El usuario no tiene el rol de ADMIN o no se encontró en la base de datos
+    }
+} 
+
 
 function verificarol() {    
-    if (isset($_SESSION['role_id']) != 1) {
+    if ($_SESSION['role'] != 1) {
         header ('location: index.php');
     }
 } 
